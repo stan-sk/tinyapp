@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/stan-sk/tinyapp/issues"
   },
-  "homepage": "https://github.com/stan-sk/tinyapp#readme"
+  "homepage": "https://github.com/stan-sk/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
 }
