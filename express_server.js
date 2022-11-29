@@ -65,9 +65,16 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
-app.get("/u/:id", (req, res) => {
-  const longURL = urlDatabase[req.params.id]
+ // if you click on shortId on the page, you then get redirected to the longURL 
+ app.get("/u/:id", (req, res) => {
+  const longURL = urlDatabase[req.params.id];
   res.redirect(longURL);
+});
+
+// edit shortURL with a different longURL
+app.post('/urls/:id', (req, res) => {
+  urlDatabase[req.params.id] = req.body.longURL;
+  res.redirect("/urls/");
 });
 
 
