@@ -19,6 +19,16 @@ function generateRandomString() {
   return result;
 };
 
+const getUserByEmail = (email) => {
+  let result = null
+  for (let ids in usersDatabase){
+    if (email === usersDatabase[ids].email) {
+      result = usersDatabase[ids]
+    } 
+  }
+  return result;
+}
+
 const usersDatabase = {};
 
 const urlDatabase = {
@@ -63,15 +73,24 @@ app.post("/register", (req, res) => {
   const email = req.body.email
   const password = req.body.password
 
-  usersDatabase[randomUserId] = {
-    id: randomUserId,
-    email: email,
-    password: password
+  if (email === "" || password === "") {
+    return res
+    .status(400)
+    .send("Sorry registration unsuccessful")
   }
-
-  res.cookie("user_id", randomUserId)
+  if (getUserByEmail(email) !== null) {
+    return res
+    .status(400)
+    .send("Email already exisits")
+  }
+    usersDatabase[randomUserId] = {
+      id: randomUserId,
+      email: email,
+      password: password
+    }
   
-  res.redirect("/urls"); 
+    res.cookie("user_id", randomUserId)
+    res.redirect("/urls");  
 });
 
 app.post("/login", (req, res) => {
