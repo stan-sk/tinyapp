@@ -47,6 +47,11 @@ app.get("/urls/new", (req, res) => {
     // username: req.cookies["username"]
     user: usersDatabase[req.cookies.user_id]
   };
+
+  if (!req.cookies.user_id) {
+    return res.redirect("/login")
+    }
+
   res.render("urls_new", templateVars);
 });
 
@@ -57,6 +62,12 @@ app.post("/urls", (req, res) => {
 
   urlDatabase[shortURLid] = req.body.longURL
   
+  if (!req.cookies.user_id) {
+    return res
+    .send("Please Log in first")
+    }
+
+
   res.redirect(`/urls/${shortURLid}`); 
 });
 
@@ -71,6 +82,11 @@ app.get("/register", (req, res) => {
     // username: req.cookies["username"]
     user: usersDatabase[req.cookies.user_id]
   };
+
+  if (req.cookies.user_id) {
+    return res.redirect("/urls")
+    }
+
   res.render("register", templateVars);
 });
 
@@ -103,6 +119,11 @@ app.get("/login", (req, res) => {
   const templateVars = { 
     user: usersDatabase[req.cookies.user_id]
   };
+
+  if (req.cookies.user_id) {
+  return res.redirect("/urls")
+  }
+
   res.render("login", templateVars);
 })
 
@@ -150,6 +171,12 @@ app.get("/urls/:id", (req, res) => {
     // username: req.cookies["username"]
     user: usersDatabase[req.cookies.user_id]
   };
+
+  if (!urlDatabase[req.params.id]) {
+    return res
+    .send ("The short url ID does not exist")
+  }
+  
   res.render("urls_show", templateVars);
 });
 
@@ -169,6 +196,12 @@ app.get("/hello", (req, res) => {
  // if you click on shortId on the page, you then get redirected to the longURL 
  app.get("/u/:id", (req, res) => {
   const longURL = urlDatabase[req.params.id];
+
+  if (!urlDatabase[req.params.id]) {
+    return res
+    .send ("The short url ID does not exist")
+  }
+
   res.redirect(longURL);
 });
 
