@@ -25,17 +25,11 @@
           <button type="submit" class="btn btn-outline-dark">Logout</button>
         </form>
      </p>
-      <% } else {%>
-       
-    <form method="POST" action="/login">
-      <input
-      type="text"
-      name="username"
-      placeholder="username"
-      >
-      <button type="submit" class="btn btn-outline-dark">Login</button>
-    </form>
-    
+    <% } else {%>
+      <div class="navbar-nav">
+        <a class="nav-item nav-link" href="/register">Register</a>
+        <a class="nav-item nav-link" href="/login">Log in</a>
+      </div>
         <% }%> 
   </nav>
 </header>
