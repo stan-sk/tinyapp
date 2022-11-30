@@ -29,7 +29,13 @@ const getUserByEmail = (email) => {
   return result;
 }
 
-const usersDatabase = {};
+const usersDatabase = {
+  abc: {
+    id: "abc",
+    email: "abc@gmail.com",
+    password: "1234"
+  }
+};
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -101,16 +107,31 @@ app.get("/login", (req, res) => {
 })
 
 app.post("/login", (req, res) => {
-  res.cookie("username", req.body.username);
-  // req.cookies.username = req.body.username;
-  console.log(req.body.username);
+  const email = req.body.email
+  const password = req.body.password
+  let user = getUserByEmail(email)
+
+  if (!user) {
+    return res
+    .status(403)
+    .send("Incorrect Email")
+  } 
   
-  res.redirect("/login")
+  if (user.password !== password) {
+    return res
+    .status(403)
+    .send("Incorrect Password")
+  }
+
+// set the cookie from th returning object
+  res.cookie("user_id", user.id)
+  res.redirect("/urls")
 })
 
+// clear the cookie
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id", req.body.user_id)
-  res.redirect("/urls/")
+  res.clearCookie("user_id")
+  res.redirect("/login")
 })
 
 app.get("/", (req, res) => {
