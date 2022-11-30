@@ -19,6 +19,8 @@ function generateRandomString() {
   return result;
 };
 
+const usersDatabase = {};
+
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
@@ -26,7 +28,8 @@ const urlDatabase = {
 
 app.get("/urls/new", (req, res) => {
   const templateVars = { 
-    username: req.cookies["username"]
+    // username: req.cookies["username"]
+    user: usersDatabase[req.cookies.user_id]
   };
   res.render("urls_new", templateVars);
 });
@@ -47,6 +50,30 @@ app.post("/urls/:id/delete", (req, res) => {
   res.redirect("/urls"); 
 });
 
+app.get("/register", (req, res) => {
+  const templateVars = { 
+    // username: req.cookies["username"]
+    user: usersDatabase[req.cookies.user_id]
+  };
+  res.render("register", templateVars);
+});
+
+app.post("/register", (req, res) => {
+  const randomUserId = generateRandomString()
+  const email = req.body.email
+  const password = req.body.password
+
+  usersDatabase[randomUserId] = {
+    id: randomUserId,
+    email: email,
+    password: password
+  }
+
+  res.cookie("user_id", randomUserId)
+  
+  res.redirect("/urls"); 
+});
+
 app.post("/login", (req, res) => {
   res.cookie("username", req.body.username);
   // req.cookies.username = req.body.username;
@@ -56,7 +83,7 @@ app.post("/login", (req, res) => {
 })
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("username", req.body.username)
+  res.clearCookie("user_id", req.body.user_id)
   res.redirect("/urls/")
 })
 
@@ -73,7 +100,8 @@ app.get("/urls/:id", (req, res) => {
   const templateVars = { 
     id: req.params.id, 
     longURL: urlDatabase[id],
-    username: req.cookies["username"]
+    // username: req.cookies["username"]
+    user: usersDatabase[req.cookies.user_id]
   };
   res.render("urls_show", templateVars);
 });
@@ -81,7 +109,8 @@ app.get("/urls/:id", (req, res) => {
 app.get("/urls", (req, res) => {
   const templateVars = { 
     urls: urlDatabase,
-    username: req.cookies["username"]
+    // username: req.cookies["username"]
+    user: usersDatabase[req.cookies.user_id]
    };
   res.render("urls_index", templateVars);
 });
