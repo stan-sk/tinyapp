@@ -38,9 +38,20 @@ const usersDatabase = {
 };
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW",
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW",
+  },
 };
+
+// const urlDatabase = {
+//   "b2xVn2": "http://www.lighthouselabs.ca",
+//   "9sm5xK": "http://www.google.com"
+// };
 
 app.get("/urls/new", (req, res) => {
   const templateVars = { 
@@ -60,8 +71,11 @@ app.post("/urls", (req, res) => {
 
   const shortURLid = generateRandomString()
 
-  urlDatabase[shortURLid] = req.body.longURL
-  
+  urlDatabase[shortURLid] = {
+    longURL: req.body.longURL,
+    userID: req.cookies.user_id
+  }
+    
   if (!req.cookies.user_id) {
     return res
     .send("Please Log in first")
@@ -164,19 +178,19 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
-  const id = req.params.id;
-  const templateVars = { 
-    id: req.params.id, 
-    longURL: urlDatabase[id],
-    // username: req.cookies["username"]
-    user: usersDatabase[req.cookies.user_id]
-  };
+  // const id = req.params.id;
 
   if (!urlDatabase[req.params.id]) {
     return res
     .send ("The short url ID does not exist")
   }
+  const templateVars = { 
+    id: req.params.id, 
+    longURL: urlDatabase[req.params.id].longURL,
   
+    user: usersDatabase[req.cookies.user_id]
+  };
+
   res.render("urls_show", templateVars);
 });
 
@@ -195,19 +209,21 @@ app.get("/hello", (req, res) => {
 
  // if you click on shortId on the page, you then get redirected to the longURL 
  app.get("/u/:id", (req, res) => {
-  const longURL = urlDatabase[req.params.id];
-
-  if (!urlDatabase[req.params.id]) {
-    return res
-    .send ("The short url ID does not exist")
-  }
+   if (!urlDatabase[req.params.id]) {
+     return res
+     .send ("The short url ID does not exist")
+   }
+  const longURL = urlDatabase[req.params.id].longURL;
 
   res.redirect(longURL);
 });
 
 // edit shortURL with a different longURL
 app.post('/urls/:id', (req, res) => {
-  urlDatabase[req.params.id] = req.body.longURL;
+  urlDatabase[req.params.id] = {
+    longURL: req.body.longURL,
+    userID: req.cookies.user_id
+  }
   res.redirect("/urls/");
 });
 
