@@ -25,4 +25,3 @@ const urlsForUser = (id) => {
 
 console.log(urlsForUser("aJ48lW"))
 
-req.params.id - short id

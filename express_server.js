@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 const cookieParser = require('cookie-parser');
+// const cookieSession = require('cookie-session');
 const bcrypt = require("bcryptjs");
 
 
@@ -9,6 +10,13 @@ const bcrypt = require("bcryptjs");
 app.set("view engine", "ejs");
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
+// app.use(cookieSession({
+//   name: 'session', // this is what the user will see when they inspect their cookies
+//   keys: [/* secret keys */], // re-encrypt under a certain time
+
+//   // Cookie Options
+//   maxAge: 24 * 60 * 60 * 1000 // 24 hours
+// }))
 
 function generateRandomString() {
   let result           = "";
@@ -22,13 +30,13 @@ function generateRandomString() {
 };
 
 const getUserByEmail = (email) => {
-  let result = null
+  let user = null
   for (let ids in usersDatabase){
     if (email === usersDatabase[ids].email) {
-      result = usersDatabase[ids]
+      user = usersDatabase[ids]
     } 
   }
-  return result;
+  return user;
 }
 
 const usersDatabase = {
@@ -157,6 +165,7 @@ app.post("/register", (req, res) => {
       password: hashedPassword
     }
   
+    // create this cookie during registration
     res.cookie("user_id", randomUserId)
     res.redirect("/urls");  
 });
@@ -257,6 +266,7 @@ app.get("/hello", (req, res) => {
 });
 
  // if you click on shortId on the page, you then get redirected to the longURL 
+ // Action only, not a page
  app.get("/u/:id", (req, res) => {
    if (!urlDatabase[req.params.id]) {
      return res
