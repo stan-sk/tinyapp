@@ -99,6 +99,23 @@ app.post("/urls", (req, res) => {
 });
 
 app.post("/urls/:id/delete", (req, res) => {
+
+const userUrls = urlsForUser(req.cookies.user_id)
+const id = req.params.id
+const userId = req.cookies.user_id
+
+if (urlDatabase[id] === undefined) {
+  return res.send("The URL you are trying to delete does not exist")
+}
+
+if (!req.cookies.user_id) {  
+  return res.send("You must log in first to delete a URL")
+}
+
+if (userUrls[id].userID !== userId) {
+  return res.send("No authorization to delete this URL")
+}
+
   delete urlDatabase[req.params.id];
   
   res.redirect("/urls"); 
@@ -192,13 +209,7 @@ app.get("/urls.json", (req, res) => {
 
 app.get("/urls/:id", (req, res) => {
   // const id = req.params.id;
-  let userOnlyURL = urlsForUser(req.cookies.user_id);
-
-  if (userOnlyURL[req.params.id] === undefined) {
-    return res
-    .send("No access")
-  }
-  
+ 
   if (!urlDatabase[req.params.id]) {
     return res
     .send ("The short url ID does not exist")
@@ -214,6 +225,12 @@ app.get("/urls/:id", (req, res) => {
     .send("You must log in first")
   }
 
+  let userOnlyURL = urlsForUser(req.cookies.user_id);
+
+  if (userOnlyURL[req.params.id] === undefined) {
+    return res
+    .send("No access")
+  }
 
   res.render("urls_show", templateVars);
 });
@@ -246,10 +263,27 @@ app.get("/hello", (req, res) => {
 
 // edit shortURL with a different longURL
 app.post('/urls/:id', (req, res) => {
-  urlDatabase[req.params.id] = {
-    longURL: req.body.longURL,
-    userID: req.cookies.user_id
-  }
+const userUrls = urlsForUser(req.cookies.user_id)
+const id = req.params.id
+const userId = req.cookies.user_id
+
+if (urlDatabase[id] === undefined) {
+  return res.send("The URL you are trying to edit does not exist")
+}
+
+if (!req.cookies.user_id) {  
+  return res.send("You must log in first to edit a URL")
+}
+
+if (userUrls[id].userID !== userId) {
+  return res.send("No authorization to edit this URL")
+}
+
+urlDatabase[req.params.id] = {
+  longURL: req.body.longURL,
+  userID: req.cookies.user_id
+}
+
   res.redirect("/urls/");
 });
 
