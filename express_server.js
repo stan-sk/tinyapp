@@ -2,10 +2,12 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 const cookieParser = require('cookie-parser');
+const bcrypt = require("bcryptjs");
 
+
+// middleware
 app.set("view engine", "ejs");
 app.use(cookieParser());
-
 app.use(express.urlencoded({ extended: true }));
 
 function generateRandomString() {
@@ -123,7 +125,6 @@ if (userUrls[id].userID !== userId) {
 
 app.get("/register", (req, res) => {
   const templateVars = { 
-    // username: req.cookies["username"]
     user: usersDatabase[req.cookies.user_id]
   };
 
@@ -138,6 +139,7 @@ app.post("/register", (req, res) => {
   const randomUserId = generateRandomString()
   const email = req.body.email
   const password = req.body.password
+  const hashedPassword = bcrypt.hashSync(password, 10);
 
   if (email === "" || password === "") {
     return res
@@ -152,7 +154,7 @@ app.post("/register", (req, res) => {
     usersDatabase[randomUserId] = {
       id: randomUserId,
       email: email,
-      password: password
+      password: hashedPassword
     }
   
     res.cookie("user_id", randomUserId)
@@ -174,7 +176,8 @@ app.get("/login", (req, res) => {
 app.post("/login", (req, res) => {
   const email = req.body.email
   const password = req.body.password
-  let user = getUserByEmail(email)
+  const user = getUserByEmail(email)
+  const userId = user.id
 
   if (!user) {
     return res
@@ -182,7 +185,10 @@ app.post("/login", (req, res) => {
     .send("Incorrect Email")
   } 
   
-  if (user.password !== password) {
+  const hashedPassword = usersDatabase[userId].password
+  const passwordCheck = bcrypt.compareSync(password, hashedPassword);
+
+  if (!passwordCheck) {
     return res
     .status(403)
     .send("Incorrect Password")
