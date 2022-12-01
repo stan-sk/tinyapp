@@ -192,7 +192,13 @@ app.get("/urls.json", (req, res) => {
 
 app.get("/urls/:id", (req, res) => {
   // const id = req.params.id;
+  let userOnlyURL = urlsForUser(req.cookies.user_id);
 
+  if (userOnlyURL[req.params.id] === undefined) {
+    return res
+    .send("No access")
+  }
+  
   if (!urlDatabase[req.params.id]) {
     return res
     .send ("The short url ID does not exist")
@@ -200,9 +206,14 @@ app.get("/urls/:id", (req, res) => {
   const templateVars = { 
     id: req.params.id, 
     longURL: urlDatabase[req.params.id].longURL,
-  
     user: usersDatabase[req.cookies.user_id]
   };
+  
+  if (!req.cookies.user_id) {
+    return res
+    .send("You must log in first")
+  }
+
 
   res.render("urls_show", templateVars);
 });
