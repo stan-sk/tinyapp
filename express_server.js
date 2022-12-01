@@ -44,10 +44,23 @@ const urlDatabase = {
   },
   i3BoGr: {
     longURL: "https://www.google.ca",
-    userID: "aJ48lW",
-  },
+    userID: "abc",
+   },
+  i3BoG5: {
+    longURL: "https://www.apple.ca",
+    userID: "abc",
+  }
 };
 
+const urlsForUser = (id) => {
+  let obj = {};
+  for (let ids in urlDatabase) {
+    if (id === urlDatabase[ids].userID) {
+      obj[ids] = urlDatabase[ids]
+    }
+  }
+  return obj
+}
 // const urlDatabase = {
 //   "b2xVn2": "http://www.lighthouselabs.ca",
 //   "9sm5xK": "http://www.google.com"
@@ -195,9 +208,11 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
+
+let userOnlyDb = urlsForUser(req.cookies.user_id) 
+  
   const templateVars = { 
-    urls: urlDatabase,
-    // username: req.cookies["username"]
+    urls: userOnlyDb,
     user: usersDatabase[req.cookies.user_id]
    };
   res.render("urls_index", templateVars);
