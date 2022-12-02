@@ -27,11 +27,11 @@ function generateRandomString() {
   return result;
 };
 
-const getUserByEmail = (email) => {
+const getUserByEmail = (email, database) => {
   let user = null
-  for (let ids in usersDatabase){
-    if (email === usersDatabase[ids].email) {
-      user = usersDatabase[ids]
+  for (let ids in database){
+    if (email === database[ids].email) {
+      user = database[ids]
     } 
   }
   return user;
@@ -144,7 +144,7 @@ app.post("/register", (req, res) => {
     .status(400)
     .send("Sorry registration unsuccessful")
   }
-  if (getUserByEmail(email) !== null) {
+  if (getUserByEmail(email, usersDatabase) !== null) {
     return res
     .status(400)
     .send("Email already exisits")
@@ -175,7 +175,7 @@ app.get("/login", (req, res) => {
 app.post("/login", (req, res) => {
   const email = req.body.email
   const password = req.body.password
-  const user = getUserByEmail(email)
+  const user = getUserByEmail(email, usersDatabase)
 
   if ( !user || !bcrypt.compareSync(password, user.password)) {
     return res
