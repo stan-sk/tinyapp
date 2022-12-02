@@ -3,7 +3,7 @@ const app = express();
 const PORT = 8080; // default port 8080
 const cookieSession = require('cookie-session');
 const bcrypt = require("bcryptjs");
-const getUserByEmail = require("./helper.js");
+const getUserByEmail = require("./helpers.js");
 
 
 // middleware
