@@ -1,6 +1,6 @@
 const express = require("express");
 const app = express();
-const PORT = 8080; // default port 8080
+const PORT = 8080;
 const cookieSession = require('cookie-session');
 const bcrypt = require("bcryptjs");
 const getUserByEmail = require("./helpers.js");
@@ -27,16 +27,6 @@ function generateRandomString() {
   }
   return result;
 };
-
-// const getUserByEmail = (email, database) => {
-//   let user = null
-//   for (let ids in database){
-//     if (email === database[ids].email) {
-//       user = database[ids]
-//     } 
-//   }
-//   return user;
-// }
 
 const usersDatabase = {
   abc: {
@@ -78,8 +68,7 @@ app.get("/urls/new", (req, res) => {
 
   if (!req.session.user_id) {
     return res.redirect("/login")
-    }
-
+  }
   res.render("urls_new", templateVars);
 });
 
@@ -96,26 +85,24 @@ app.post("/urls", (req, res) => {
   if (!req.session.user_id) {
     return res
     .send("Please Log in first")
-    }
-
+  }
   res.redirect(`/urls/${shortURLid}`); 
 });
 
 app.post("/urls/:id/delete", (req, res) => {
+  const userUrls = urlsForUser(req.session.user_id)
+  const id = req.params.id
+  const userId = req.session.user_id
 
-const userUrls = urlsForUser(req.session.user_id)
-const id = req.params.id
-const userId = req.session.user_id
-
-if (urlDatabase[id] === undefined) {
-  return res.send("The URL you are trying to delete does not exist")
-}
-if (!req.session.user_id) {  
-  return res.send("You must log in first to delete a URL")
-}
-if (userUrls[id].userID !== userId) {
-  return res.send("No authorization to delete this URL")
-}
+  if (urlDatabase[id] === undefined) {
+    return res.send("The URL you are trying to delete does not exist")
+  }
+  if (!req.session.user_id) {  
+    return res.send("You must log in first to delete a URL")
+  }
+  if (userUrls[id].userID !== userId) {
+    return res.send("No authorization to delete this URL")
+  }
 
   delete urlDatabase[req.params.id];
   
@@ -129,8 +116,7 @@ app.get("/register", (req, res) => {
 
   if (req.session.user_id) {
     return res.redirect("/urls")
-    }
-
+  }
   res.render("register", templateVars);
 });
 
@@ -150,12 +136,12 @@ app.post("/register", (req, res) => {
     .status(400)
     .send("Email already exisits")
   }
-    usersDatabase[randomUserId] = {
-      id: randomUserId,
-      email: email,
-      password: hashedPassword
-    }
-  
+    
+  usersDatabase[randomUserId] = {
+    id: randomUserId,
+    email: email,
+    password: hashedPassword
+  }
     // create this cookie during registration
     req.session.user_id = randomUserId
     res.redirect("/urls");  
@@ -183,8 +169,6 @@ app.post("/login", (req, res) => {
     .status(403)
     .send("Invalid email or password")
   }
-
-
 // set the cookie from th returning object
   req.session.user_id = user.id
   res.redirect("/urls")
@@ -233,7 +217,7 @@ app.get("/urls/:id", (req, res) => {
 
 app.get("/urls", (req, res) => {
 
-let userOnlyDb = urlsForUser(req.session.user_id) 
+  let userOnlyDb = urlsForUser(req.session.user_id) 
   
   const templateVars = { 
     urls: userOnlyDb,
@@ -242,17 +226,13 @@ let userOnlyDb = urlsForUser(req.session.user_id)
   res.render("urls_index", templateVars);
 });
 
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
-
  // if you click on shortId on the page, you then get redirected to the longURL 
  // Action only, not a page
- app.get("/u/:id", (req, res) => {
-   if (!urlDatabase[req.params.id]) {
-     return res
-     .send ("The short url ID does not exist")
-   }
+app.get("/u/:id", (req, res) => {
+  if (!urlDatabase[req.params.id]) {
+    return res
+    .send ("The short url ID does not exist")
+  }
   const longURL = urlDatabase[req.params.id].longURL;
 
   res.redirect(longURL);
@@ -260,24 +240,24 @@ app.get("/hello", (req, res) => {
 
 // edit shortURL with a different longURL
 app.post('/urls/:id', (req, res) => {
-const userUrls = urlsForUser(req.session.user_id)
-const id = req.params.id
-const userId = req.session.user_id
+  const userUrls = urlsForUser(req.session.user_id)
+  const id = req.params.id
+  const userId = req.session.user_id
 
-if (urlDatabase[id] === undefined) {
-  return res.send("The URL you are trying to edit does not exist")
-}
-if (!req.session.user_id) {  
-  return res.send("You must log in first to edit a URL")
-}
-if (userUrls[id].userID !== userId) {
-  return res.send("No authorization to edit this URL")
-}
+  if (urlDatabase[id] === undefined) {
+    return res.send("The URL you are trying to edit does not exist")
+  }
+  if (!req.session.user_id) {  
+    return res.send("You must log in first to edit a URL")
+  }
+  if (userUrls[id].userID !== userId) {
+    return res.send("No authorization to edit this URL")
+  }
 
-urlDatabase[req.params.id] = {
-  longURL: req.body.longURL,
-  userID: req.session.user_id
-}
+  urlDatabase[req.params.id] = {
+    longURL: req.body.longURL,
+    userID: req.session.user_id
+  }
 
   res.redirect("/urls/");
 });
