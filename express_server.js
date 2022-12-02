@@ -1,20 +1,18 @@
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
-// const cookieParser = require('cookie-parser');
 const cookieSession = require('cookie-session');
 const bcrypt = require("bcryptjs");
 
 
 // middleware
 app.set("view engine", "ejs");
-// app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieSession({
   name: 'cookieMonster', // this is what the user will see when they inspect their cookies
   keys: ["verspecialkey", "veryveryspecialkey"], // re-encrypt under a certain time
 
-  // Cookie Options
+// Cookie Options
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }))
 
@@ -71,19 +69,13 @@ const urlsForUser = (id) => {
   }
   return obj
 }
-// const urlDatabase = {
-//   "b2xVn2": "http://www.lighthouselabs.ca",
-//   "9sm5xK": "http://www.google.com"
-// };
 
 app.get("/urls/new", (req, res) => {
   const templateVars = { 
-    // user: usersDatabase[req.cookies.user_id]
     user: usersDatabase[req.session.user_id]
   };
 
-  // if (!req.cookies.user_id) {
-    if (!req.session.user_id) {
+  if (!req.session.user_id) {
     return res.redirect("/login")
     }
 
@@ -97,37 +89,29 @@ app.post("/urls", (req, res) => {
 
   urlDatabase[shortURLid] = {
     longURL: req.body.longURL,
-    // userID: req.cookies.user_id
     userID: req.session.user_id
   }
     
-  // if (!req.cookies.user_id) {
-    if (!req.session.user_id) {
+  if (!req.session.user_id) {
     return res
     .send("Please Log in first")
     }
-
 
   res.redirect(`/urls/${shortURLid}`); 
 });
 
 app.post("/urls/:id/delete", (req, res) => {
 
-// const userUrls = urlsForUser(req.cookies.user_id)
 const userUrls = urlsForUser(req.session.user_id)
 const id = req.params.id
-// const userId = req.cookies.user_id
 const userId = req.session.user_id
 
 if (urlDatabase[id] === undefined) {
   return res.send("The URL you are trying to delete does not exist")
 }
-
-// if (!req.cookies.user_id) {  
-  if (!req.session.user_id) {  
+if (!req.session.user_id) {  
   return res.send("You must log in first to delete a URL")
 }
-
 if (userUrls[id].userID !== userId) {
   return res.send("No authorization to delete this URL")
 }
@@ -139,12 +123,10 @@ if (userUrls[id].userID !== userId) {
 
 app.get("/register", (req, res) => {
   const templateVars = { 
-    // user: usersDatabase[req.cookies.user_id]
     user: usersDatabase[req.session.user_id]
   };
 
-  // if (req.cookies.user_id) {
-    if (req.session.user_id) {
+  if (req.session.user_id) {
     return res.redirect("/urls")
     }
 
@@ -174,20 +156,17 @@ app.post("/register", (req, res) => {
     }
   
     // create this cookie during registration
-    // res.cookie("user_id", randomUserId)
     req.session.user_id = randomUserId
     res.redirect("/urls");  
 });
 
 app.get("/login", (req, res) => {
   const templateVars = { 
-    // user: usersDatabase[req.cookies.user_id]
     user: usersDatabase[req.session.user_id]
   };
 
-  // if (req.cookies.user_id) {
-    if (req.session.user_id) {
-  return res.redirect("/urls")
+  if (req.session.user_id) {
+    return res.redirect("/urls")
   }
 
   res.render("login", templateVars);
@@ -201,18 +180,17 @@ app.post("/login", (req, res) => {
   if ( !user || !bcrypt.compareSync(password, user.password)) {
     return res
     .status(403)
-    .send("Error: Invalid email or password")
+    .send("Invalid email or password")
   }
 
+
 // set the cookie from th returning object
-  // res.cookie("user_id", user.id)
   req.session.user_id = user.id
   res.redirect("/urls")
 })
 
 // clear the cookie
 app.post("/logout", (req, res) => {
-  // res.clearCookie("user_id")
   req.session = null
   res.redirect("/login")
 })
@@ -226,7 +204,6 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
-  // const id = req.params.id;
  
   if (!urlDatabase[req.params.id]) {
     return res
@@ -235,17 +212,14 @@ app.get("/urls/:id", (req, res) => {
   const templateVars = { 
     id: req.params.id, 
     longURL: urlDatabase[req.params.id].longURL,
-    // user: usersDatabase[req.cookies.user_id]
     user: usersDatabase[req.session.user_id]
   };
   
-  // if (!req.cookies.user_id) {
     if (!req.session.user_id) {
     return res
     .send("You must log in first")
   }
 
-  // let userOnlyURL = urlsForUser(req.cookies.user_id);
   let userOnlyURL = urlsForUser(req.session.user_id);
 
   if (userOnlyURL[req.params.id] === undefined) {
@@ -258,12 +232,10 @@ app.get("/urls/:id", (req, res) => {
 
 app.get("/urls", (req, res) => {
 
-// let userOnlyDb = urlsForUser(req.cookies.user_id)
 let userOnlyDb = urlsForUser(req.session.user_id) 
   
   const templateVars = { 
     urls: userOnlyDb,
-    // user: usersDatabase[req.cookies.user_id]
     user: usersDatabase[req.session.user_id]
    };
   res.render("urls_index", templateVars);
@@ -287,28 +259,22 @@ app.get("/hello", (req, res) => {
 
 // edit shortURL with a different longURL
 app.post('/urls/:id', (req, res) => {
-// const userUrls = urlsForUser(req.cookies.user_id)
 const userUrls = urlsForUser(req.session.user_id)
 const id = req.params.id
-// const userId = req.cookies.user_id
 const userId = req.session.user_id
 
 if (urlDatabase[id] === undefined) {
   return res.send("The URL you are trying to edit does not exist")
 }
-
-// if (!req.cookies.user_id) {  
-  if (!req.session.user_id) {  
+if (!req.session.user_id) {  
   return res.send("You must log in first to edit a URL")
 }
-
 if (userUrls[id].userID !== userId) {
   return res.send("No authorization to edit this URL")
 }
 
 urlDatabase[req.params.id] = {
   longURL: req.body.longURL,
-  // userID: req.cookies.user_id
   userID: req.session.user_id
 }
 
