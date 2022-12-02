@@ -3,6 +3,7 @@ const app = express();
 const PORT = 8080; // default port 8080
 const cookieSession = require('cookie-session');
 const bcrypt = require("bcryptjs");
+const getUserByEmail = require("./helper.js");
 
 
 // middleware
@@ -27,15 +28,15 @@ function generateRandomString() {
   return result;
 };
 
-const getUserByEmail = (email, database) => {
-  let user = null
-  for (let ids in database){
-    if (email === database[ids].email) {
-      user = database[ids]
-    } 
-  }
-  return user;
-}
+// const getUserByEmail = (email, database) => {
+//   let user = null
+//   for (let ids in database){
+//     if (email === database[ids].email) {
+//       user = database[ids]
+//     } 
+//   }
+//   return user;
+// }
 
 const usersDatabase = {
   abc: {
